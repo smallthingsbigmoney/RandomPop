@@ -18,6 +18,7 @@
       "bundleIdentifier": "com.anonymous.random-pop"
     },
     "android": {
+      "package": "com.moonsanghyuk.randompop",
       "adaptiveIcon": {
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -30,6 +31,12 @@
     },
     "plugins": [
       "expo-asset"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "30611598-9f16-41b3-af93-c5ee9f65c1e6"
+      }
+    },
+    "owner": "moonsanghyuk"
   }
 }
