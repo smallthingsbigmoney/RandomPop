@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Easing,
   Platform,
+  StatusBar as RNStatusBar,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -16,14 +17,34 @@ import { Audio } from 'expo-av';
 import { useFonts, Nunito_700Bold, Nunito_800ExtraBold, Nunito_900Black } from '@expo-google-fonts/nunito';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 
+let BannerAd, BannerAdSize, TestIds;
+try {
+  const ads = require('react-native-google-mobile-ads');
+  BannerAd = ads.BannerAd;
+  BannerAdSize = ads.BannerAdSize;
+  TestIds = ads.TestIds;
+} catch (_) {
+  BannerAd = null;
+}
+
+const AD_UNIT_ID = __DEV__
+  ? (TestIds?.BANNER ?? '')
+  : 'ca-app-pub-3084145762115882/4914560802';
+
 SplashScreen.preventAutoHideAsync();
 
 const BANNER_H = 60;
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const SCREEN_FULL_H = Dimensions.get('screen').height;
 const IS_PAD = Platform.isPad;
 const HAS_HOME_INDICATOR =
   Platform.OS === 'ios' && !IS_PAD && (SCREEN_H >= 812 || SCREEN_W >= 812);
-const BOTTOM_INSET = HAS_HOME_INDICATOR ? 34 : 0;
+const ANDROID_NAV_H =
+  Platform.OS === 'android'
+    ? Math.max(SCREEN_FULL_H - SCREEN_H - (RNStatusBar.currentHeight || 0), 48)
+    : 0;
+const BOTTOM_INSET =
+  Platform.OS === 'ios' ? (HAS_HOME_INDICATOR ? 34 : 0) : ANDROID_NAV_H;
 const MAX_PLAYERS = IS_PAD ? 11 : 5;
 const CIRCLE_R = 70;
 const CIRCLE_D = CIRCLE_R * 2;
@@ -404,7 +425,9 @@ export default function App() {
               Hold your fingers{'\n'}on the screen
             </Text>
             <Text style={styles.subPrompt}>
-              Tap and hold, countdown begins shortly{'\n'}
+              Tap and hold, countdown begins shortly
+            </Text>
+            <Text style={[styles.subPrompt, { marginTop: 4 }]}>
               Up to {MAX_PLAYERS} players supported
             </Text>
           </View>
@@ -529,9 +552,17 @@ export default function App() {
       </GestureDetector>
 
       <View style={[styles.adBanner, { paddingBottom: BOTTOM_INSET }]}>
-        <View style={styles.adPlaceholder}>
-          <Text style={styles.adPlaceholderText}>AD BANNER</Text>
-        </View>
+        {BannerAd ? (
+          <BannerAd
+            unitId={AD_UNIT_ID}
+            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+            requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+          />
+        ) : (
+          <View style={styles.adPlaceholder}>
+            <Text style={styles.adPlaceholderText}>AD BANNER</Text>
+          </View>
+        )}
       </View>
     </GestureHandlerRootView>
   );
