@@ -16,6 +16,7 @@ import * as Haptics from 'expo-haptics';
 import { Audio } from 'expo-av';
 import { useFonts, Nunito_700Bold, Nunito_800ExtraBold, Nunito_900Black } from '@expo-google-fonts/nunito';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as NavigationBar from 'expo-navigation-bar';
 
 let BannerAd, BannerAdSize, TestIds;
 try {
@@ -32,6 +33,10 @@ const AD_UNIT_ID = __DEV__
   : 'ca-app-pub-3084145762115882/4914560802';
 
 SplashScreen.preventAutoHideAsync();
+if (Platform.OS === 'android') {
+  NavigationBar.setBackgroundColorAsync('#000000');
+  NavigationBar.setButtonStyleAsync('light');
+}
 
 const BANNER_H = 60;
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
