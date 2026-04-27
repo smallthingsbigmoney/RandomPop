@@ -30,7 +30,9 @@ try {
 
 const AD_UNIT_ID = __DEV__
   ? (TestIds?.BANNER ?? '')
-  : 'ca-app-pub-3084145762115882/4914560802';
+  : (Platform.OS === 'ios'
+    ? 'ca-app-pub-3084145762115882/6276731015'
+    : 'ca-app-pub-3084145762115882/4914560802');
 
 SplashScreen.preventAutoHideAsync();
 if (Platform.OS === 'android') {
@@ -87,6 +89,8 @@ const fanfareSound = require('./assets/sounds/fanfare.wav');
 
 export default function App() {
   const [fontsLoaded] = useFonts({ Nunito_700Bold, Nunito_800ExtraBold, Nunito_900Black });
+  const [adLoaded, setAdLoaded] = useState(false);
+  const [adFailed, setAdFailed] = useState(false);
 
   const soundsRef = useRef({ tick: null, fanfare: null });
 
@@ -556,17 +560,24 @@ export default function App() {
         </View>
       </GestureDetector>
 
-      <View style={[styles.adBanner, { paddingBottom: BOTTOM_INSET }]}>
-        {BannerAd ? (
+      <View style={[styles.adBanner, { paddingBottom: BOTTOM_INSET, height: BANNER_H + BOTTOM_INSET }]}>
+        {BannerAd && AD_UNIT_ID ? (
           <BannerAd
             unitId={AD_UNIT_ID}
             size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
             requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+            onAdLoaded={() => {
+              setAdLoaded(true);
+              setAdFailed(false);
+            }}
+            onAdFailedToLoad={() => {
+              setAdLoaded(false);
+              setAdFailed(true);
+            }}
           />
-        ) : (
-          <View style={styles.adPlaceholder}>
-            <Text style={styles.adPlaceholderText}>AD BANNER</Text>
-          </View>
+        ) : null}
+        {(!BannerAd || !AD_UNIT_ID || adFailed || !adLoaded) && (
+          <View style={styles.adPlaceholder} />
         )}
       </View>
     </GestureHandlerRootView>
@@ -624,12 +635,9 @@ const styles = StyleSheet.create({
   },
   adBanner: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
-    alignItems: 'center', backgroundColor: '#000000',
+    alignItems: 'center', justifyContent: 'center', backgroundColor: '#000000',
   },
   adPlaceholder: {
-    width: '100%', height: BANNER_H, backgroundColor: '#1a1a2e',
-    justifyContent: 'center', alignItems: 'center',
-    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#333',
+    width: '100%', height: BANNER_H, backgroundColor: '#000000',
   },
-  adPlaceholderText: { color: '#555', fontSize: 13, letterSpacing: 2 },
 });
